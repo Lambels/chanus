@@ -40,6 +40,18 @@ impl<T> Sender<T> {
     }
 }
 
+impl<T> Clone for Sender<T> {
+    fn clone(&self) -> Self {
+        let mut guard = self.inner.mu.lock().unwrap();
+        guard.senders += 1;
+        drop(guard);
+
+        Self {
+            inner: Arc::clone(&self.inner),
+        }
+    }
+}
+
 impl<T> Drop for Sender<T> {
     fn drop(&mut self) {
         let mut guard = self.inner.mu.lock().unwrap();
